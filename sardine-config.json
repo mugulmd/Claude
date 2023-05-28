@@ -1,0 +1,15 @@
+{
+  "root": "/path/to/Claude",
+  "package": "claude_client",
+  "handlers": [
+    {
+      "module": "ClaudeHandler",
+      "class": "ClaudeHandler",
+      "send_alias": "Claude",
+      "params": {
+        "ip": "127.0.0.1",
+        "port": 65432
+      }
+    }
+  ]
+}
