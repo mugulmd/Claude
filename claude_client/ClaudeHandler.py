@@ -9,12 +9,17 @@ class ClaudeHandler(Sender):
     def __init__(self, params: dict):
         super().__init__()
 
-        # Setup connection to Claude server
-        self._socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self._socket.connect((params['ip'], params['port']))
+        try:
+            # Setup connection to Claude server
+            self._socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            self._socket.connect((params['ip'], params['port']))
+        except Exception as e:
+            print(f'Connection to Claude server failed: {e}')
+            self._socket = None
 
     def _send(self, message: str):
-        self._socket.send(message.encode())
+        if self._socket:
+            self._socket.send(message.encode())
 
     @alias_param(name="iterator", alias="i")
     @alias_param(name="divisor", alias="d")
