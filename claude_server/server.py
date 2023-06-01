@@ -20,7 +20,7 @@ def server_feed(ip: str, port: int, q: Queue):
                     # Parse message and feed it through queue
                     msg = data.decode('utf-8').split(' ')
                     name = msg[0]
-                    value = float(msg[1])
+                    value = list(map(float, msg[1:]))
                     q.put_nowait({
                         'name': name,
                         'value': value
