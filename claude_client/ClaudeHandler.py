@@ -1,7 +1,8 @@
-from sardine_core.handlers.sender import Number, NumericElement, ParsableElement, Sender
+from sardine_core.handlers.sender import Number, NumericElement, ParsableElement, Sender, StringElement
 from sardine_core.utils import alias_param
 
 import socket
+from typing import Optional, List
 
 
 class ClaudeHandler(Sender):
@@ -27,7 +28,7 @@ class ClaudeHandler(Sender):
     def send(
         self,
         name: str,
-        value: NumericElement,
+        value: Optional[StringElement | List[StringElement]],
         iterator: Number = 0,
         divisor: NumericElement = 1,
         rate: NumericElement = 1,
@@ -39,10 +40,23 @@ class ClaudeHandler(Sender):
         if self.apply_conditional_mask_to_bars(pattern):
             return
 
-        pattern['value'] = value
+        dims = ['x', 'y', 'z', 'w']
+
+        if isinstance(value, list):
+            if len(value) > 4:
+                return
+            for idx in range(len(value)):
+                pattern[dims[idx]] = value[idx]
+        else:
+            pattern[dims[0]] = value
+
         reduced = self.pattern_reduce(pattern, iterator, divisor, rate)
 
         deadline = self.env.clock.shifted_time
         for item in reduced:
-            message = f"{name} {item['value']}"
+            message = name
+            for dim in dims:
+                if not dim in item:
+                    break;
+                message += f' {item[dim]}'
             self.call_timed(deadline, self._send, message)
