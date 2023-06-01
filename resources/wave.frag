@@ -3,8 +3,10 @@
 uniform vec2 resolution;
 uniform float time;
 
-uniform float freq;
-uniform float amp;
+uniform float freq = 1.0;
+uniform float amp = 0.1;
+uniform vec3 water = vec3(0.0, 0.0, 1.0);
+uniform vec3 sky = vec3(1.0);
 
 out vec3 frag_color;
 
@@ -21,8 +23,8 @@ void main() {
 
     // Write output color
     if (uv.y < threshold) {
-        frag_color = vec3(0.0);
+        frag_color = water;
     } else {
-        frag_color = vec3(1.0);
+        frag_color = sky;
     }
 }
