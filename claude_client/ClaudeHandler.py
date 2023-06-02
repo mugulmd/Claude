@@ -25,6 +25,7 @@ class ClaudeHandler(Sender):
     @alias_param(name="iterator", alias="i")
     @alias_param(name="divisor", alias="d")
     @alias_param(name="rate", alias="r")
+    @alias_param(name="datatype", alias="dt")
     def send(
         self,
         name: str,
