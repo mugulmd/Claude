@@ -3,6 +3,9 @@ from claude_server.server import server_feed
 import moderngl_window as mglw
 import numpy as np
 
+from watchdog.observers import Observer
+from watchdog.events import PatternMatchingEventHandler
+
 from multiprocessing import Process, Queue
 
 
@@ -45,8 +48,31 @@ class ClaudeApp(mglw.WindowConfig):
         self.queue = Queue()
 
         # Create and launch server process
-        self.server = Process(target=server_feed, args=(ClaudeApp.ip, ClaudeApp.port, self.queue,))
+        self.server = Process(
+            target=server_feed,
+            args=(ClaudeApp.ip, ClaudeApp.port, self.queue,)
+        )
         self.server.start()
+
+        # Create filewatcher event handler
+        filewatcher_handler = PatternMatchingEventHandler(
+            patterns=[ClaudeApp.fragment_shader],
+            ignore_directories=True,
+            case_sensitive=True
+        )
+        filewatcher_handler.on_modified = self.on_frag_changed
+
+        # Create and launch filewatcher
+        self.observer = Observer()
+        self.observer.schedule(
+            filewatcher_handler,
+            path=ClaudeApp.resource_dir,
+            recursive=False
+        )
+        self.observer.start()
+
+    def on_frag_changed(self, event):
+        print(f'{event.src_path} changed')
 
     def write_uniform(self, np_dtype, name, value):
         try:
@@ -76,3 +102,7 @@ class ClaudeApp(mglw.WindowConfig):
     def close(self):
         # Terminate server
         self.server.terminate()
+
+        # Stop filewatcher
+        self.observer.stop()
+        self.observer.join()
