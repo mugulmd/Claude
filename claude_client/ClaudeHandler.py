@@ -29,17 +29,12 @@ class ClaudeHandler(Sender):
         self,
         name: str,
         value: Optional[StringElement | List[StringElement]],
+        datatype: str = 'f',
         iterator: Number = 0,
         divisor: NumericElement = 1,
         rate: NumericElement = 1,
         **pattern: ParsableElement,
     ):
-        if name is None or value is None:
-            return
-
-        if self.apply_conditional_mask_to_bars(pattern):
-            return
-
         dims = ['x', 'y', 'z', 'w']
 
         if isinstance(value, list):
@@ -54,7 +49,7 @@ class ClaudeHandler(Sender):
 
         deadline = self.env.clock.shifted_time
         for item in reduced:
-            message = name
+            message = f'{datatype} {name}'
             for dim in dims:
                 if not dim in item:
                     break;
