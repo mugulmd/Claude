@@ -8,3 +8,4 @@ pkg_resources==0.0.0
 pyglet==2.0.7
 pyrr==0.10.3
 six==1.16.0
+watchdog==3.0.0
