@@ -42,7 +42,7 @@ class ClaudeApp(mglw.WindowConfig):
         self.vao = self.ctx.vertex_array(self.program, vbo, 'in_vert')
 
         # Initialize uniforms
-        self.write_uniform('resolution', ClaudeApp.window_size)
+        self.write_uniform('f4', 'resolution', ClaudeApp.window_size)
 
         # Queue for sending messages from server process to application process
         self.queue = Queue()
@@ -51,22 +51,22 @@ class ClaudeApp(mglw.WindowConfig):
         self.server = Process(target=server_feed, args=(ClaudeApp.ip, ClaudeApp.port, self.queue,))
         self.server.start()
 
-    def write_uniform(self, name, value):
+    def write_uniform(self, np_dtype, name, value):
         try:
-            self.program.get(name, None).write(np.array(value).astype('f4').tobytes())
+            self.program.get(name, None).write(np.array(value).astype(np_dtype).tobytes())
         except Exception:
             pass
 
     def render(self, time, frametime):
         # Prepare next frame
         self.ctx.clear(0.0, 0.0, 0.0, 0.0)
-        self.write_uniform('time', time)
+        self.write_uniform('f4', 'time', time)
 
         # Read messages fed from server and update uniforms accordingly
         while not self.queue.empty():
             try:
                 item = self.queue.get_nowait()
-                self.write_uniform(item['name'], item['value'])
+                self.write_uniform(item['np_dtype'], item['name'], item['value'])
             except Exception:
                 pass
 
