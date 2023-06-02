@@ -18,10 +18,16 @@ def server_feed(ip: str, port: int, q: Queue):
                 data = conn.recv(1024)
                 try:
                     # Parse message and feed it through queue
-                    msg = data.decode('utf-8').split(' ')
-                    name = msg[0]
-                    value = list(map(float, msg[1:]))
+                    message = data.decode('utf-8').split(' ')
+                    datatype = message[0]
+                    name = message[1]
+                    value = message[2:]
+                    if datatype == 'i':
+                        value = list(map(int, value))
+                    else:
+                        value = list(map(float, value))
                     q.put_nowait({
+                        'np_dtype': 'i4' if datatype == 'i' else 'f4',
                         'name': name,
                         'value': value
                     })
