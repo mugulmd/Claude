@@ -72,19 +72,28 @@ class ClaudeApp(mglw.WindowConfig):
         )
         self.observer.start()
 
+        # Uniform cache
+        self.uniform_cache = {}
+
     def on_frag_changed(self, event):
         self.reload_frag = True
 
-    def write_uniform(self, np_dtype, name, value):
+    def write_uniform(self, np_dtype, name, value, caching = True):
         try:
             self.program.get(name, None).write(np.array(value).astype(np_dtype).tobytes())
-        except Exception:
-            pass
+        except Exception as e:
+            print(e)
+            return
+
+        if caching:
+            self.uniform_cache[name] = {
+                'np_dtype': np_dtype,
+                'value': value
+            }
 
     def render(self, time, frametime):
         # Prepare next frame
         self.ctx.clear(0.0, 0.0, 0.0, 0.0)
-        self.write_uniform('f4', 'time', time)
 
         # Reload fragment shader
         if self.reload_frag:
@@ -98,6 +107,8 @@ class ClaudeApp(mglw.WindowConfig):
                 print(e)
             self.program = program
             self.vao = self.ctx.vertex_array(self.program, self.vbo, 'in_vert')
+            for name, content in self.uniform_cache.items():
+                self.write_uniform(content['np_dtype'], name, content['value'], False)
 
         # Read messages fed from server and update uniforms accordingly
         while not self.queue.empty():
@@ -106,6 +117,9 @@ class ClaudeApp(mglw.WindowConfig):
                 self.write_uniform(item['np_dtype'], item['name'], item['value'])
             except Exception:
                 pass
+
+        # Update time
+        self.write_uniform('f4', 'time', time, False)
 
         # Render frame
         self.vao.render()
