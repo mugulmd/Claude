@@ -41,9 +41,6 @@ class ClaudeApp(mglw.WindowConfig):
         vbo = self.ctx.buffer(vertices.astype('f4').tobytes())
         self.vao = self.ctx.vertex_array(self.program, vbo, 'in_vert')
 
-        # Initialize uniforms
-        self.write_uniform('f4', 'resolution', ClaudeApp.window_size)
-
         # Queue for sending messages from server process to application process
         self.queue = Queue()
 
@@ -72,6 +69,9 @@ class ClaudeApp(mglw.WindowConfig):
 
         # Render frame
         self.vao.render()
+
+    def resize(self, width, height):
+        self.write_uniform('f4', 'resolution', (width, height))
 
     def close(self):
         # Terminate server
