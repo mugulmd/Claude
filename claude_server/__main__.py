@@ -21,11 +21,9 @@ parser.add_argument('--size', type=int, nargs=2, metavar=('W', 'H'), default=[80
 args = parser.parse_args()
 
 # Register resources directories
-register_dir((Path(__file__).parents[1] / 'resources').resolve())
-if not args.res:
-    register_dir(Path.cwd())
-else:
-    register_dir(args.res)
+ClaudeApp.resource_dir = (Path(__file__).parents[1] / 'resources').resolve()
+if args.res:
+    ClaudeApp.resource_dir = args.res
 
 # Configuration
 ClaudeApp.fragment_shader = args.frag
