@@ -41,8 +41,8 @@ class ClaudeApp(mglw.WindowConfig):
         ])
 
         # Create vertex buffer and vertex array
-        vbo = self.ctx.buffer(vertices.astype('f4').tobytes())
-        self.vao = self.ctx.vertex_array(self.program, vbo, 'in_vert')
+        self.vbo = self.ctx.buffer(vertices.astype('f4').tobytes())
+        self.vao = self.ctx.vertex_array(self.program, self.vbo, 'in_vert')
 
         # Queue for sending messages from server process to application process
         self.queue = Queue()
@@ -55,6 +55,7 @@ class ClaudeApp(mglw.WindowConfig):
         self.server.start()
 
         # Create filewatcher event handler
+        self.reload_frag = False
         filewatcher_handler = PatternMatchingEventHandler(
             patterns=[ClaudeApp.fragment_shader],
             ignore_directories=True,
@@ -72,7 +73,7 @@ class ClaudeApp(mglw.WindowConfig):
         self.observer.start()
 
     def on_frag_changed(self, event):
-        print(f'{event.src_path} changed')
+        self.reload_frag = True
 
     def write_uniform(self, np_dtype, name, value):
         try:
@@ -84,6 +85,19 @@ class ClaudeApp(mglw.WindowConfig):
         # Prepare next frame
         self.ctx.clear(0.0, 0.0, 0.0, 0.0)
         self.write_uniform('f4', 'time', time)
+
+        # Reload fragment shader
+        if self.reload_frag:
+            self.reload_frag = False
+            try:
+                program = self.load_program(
+                    vertex_shader=ClaudeApp.vertex_shader,
+                    fragment_shader=ClaudeApp.fragment_shader
+                )
+            except Exception as e:
+                print(e)
+            self.program = program
+            self.vao = self.ctx.vertex_array(self.program, self.vbo, 'in_vert')
 
         # Read messages fed from server and update uniforms accordingly
         while not self.queue.empty():
