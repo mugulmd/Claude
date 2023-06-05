@@ -1,5 +1,6 @@
 from claude_server.app import ClaudeApp
 
+from moderngl_window import run_window_config
 from moderngl_window.resources import register_dir
 
 from argparse import ArgumentParser
@@ -33,4 +34,4 @@ ClaudeApp.title = args.title
 ClaudeApp.window_size = (args.size[0], args.size[1])
 
 # Start application
-ClaudeApp.run()
+run_window_config(ClaudeApp, args=['-wnd', 'pyglet'])
