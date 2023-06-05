@@ -80,7 +80,9 @@ class ClaudeApp(mglw.WindowConfig):
 
     def write_uniform(self, np_dtype, name, value, caching = True):
         try:
-            self.program.get(name, None).write(np.array(value).astype(np_dtype).tobytes())
+            uniform = self.program.get(name, None)
+            if uniform:
+                uniform.write(np.array(value).astype(np_dtype).tobytes())
         except Exception as e:
             print(e)
             return
