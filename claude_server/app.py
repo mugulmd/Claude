@@ -10,7 +10,17 @@ from multiprocessing import Process, Queue
 
 
 class ClaudeApp(mglw.WindowConfig):
+    """Class centralizing the Claude server application.
 
+    This class is in charge of:
+      * window management
+      * rendering with OpenGL
+      * updating uniforms and the shading program when needed.
+
+    It also manages the server process and filewatcher which allow interactivity.
+    """
+
+    # OpenGL version
     gl_version = (3, 3)
 
     # Window configuration
@@ -19,7 +29,7 @@ class ClaudeApp(mglw.WindowConfig):
 
     # Shader configuration
     vertex_shader = 'default.vert'
-    fragment_shader = 'wave.frag'
+    fragment_shader = 'template.frag'
 
     # Server configuration
     ip = '127.0.0.1'
@@ -44,7 +54,7 @@ class ClaudeApp(mglw.WindowConfig):
         self.vbo = self.ctx.buffer(vertices.astype('f4').tobytes())
         self.vao = self.ctx.vertex_array(self.program, self.vbo, 'in_vert')
 
-        # Queue for sending messages from server process to application process
+        # Queue for sending messages from server process to rendering process
         self.queue = Queue()
 
         # Create and launch server process
@@ -73,20 +83,27 @@ class ClaudeApp(mglw.WindowConfig):
         self.observer.start()
 
         # Uniform cache
+        # Used to reset uniforms to their latest value
+        # after fragment shader is reloaded
         self.uniform_cache = {}
 
     def on_frag_changed(self, event):
+        # Notify rendering process that fragment shader must be reloaded
         self.reload_frag = True
 
     def write_uniform(self, np_dtype, name, value, caching = True):
         try:
+            # Retrieve uniform object using its name
             uniform = self.program.get(name, None)
             if uniform:
+                # Send value as raw bytes
                 uniform.write(np.array(value).astype(np_dtype).tobytes())
         except Exception as e:
             print(e)
             return
 
+        # Uniform value was sent successfully
+        # Store this value in the uniform cache
         if caching:
             self.uniform_cache[name] = {
                 'np_dtype': np_dtype,
@@ -105,28 +122,35 @@ class ClaudeApp(mglw.WindowConfig):
                     vertex_shader=ClaudeApp.vertex_shader,
                     fragment_shader=ClaudeApp.fragment_shader
                 )
+                # Loading was successful
+                # Reset OpenGL objects
+                self.program = program
+                self.vao = self.ctx.vertex_array(self.program, self.vbo, 'in_vert')
+                # Send last known uniform values
+                for name, content in self.uniform_cache.items():
+                    self.write_uniform(content['np_dtype'], name, content['value'], False)
             except Exception as e:
                 print(e)
-            self.program = program
-            self.vao = self.ctx.vertex_array(self.program, self.vbo, 'in_vert')
-            for name, content in self.uniform_cache.items():
-                self.write_uniform(content['np_dtype'], name, content['value'], False)
 
         # Read messages fed from server and update uniforms accordingly
         while not self.queue.empty():
             try:
                 item = self.queue.get_nowait()
                 self.write_uniform(item['np_dtype'], item['name'], item['value'])
-            except Exception:
+            except Exception as e:
+                print(e)
                 pass
 
         # Update time
+        # No need to cache the time uniform value
+        # as it must be sent between each frame
         self.write_uniform('f4', 'time', time, False)
 
         # Render frame
         self.vao.render()
 
     def resize(self, width, height):
+        # Update resolution uniform with new dimensions
         self.write_uniform('f4', 'resolution', (width, height))
 
     def close(self):

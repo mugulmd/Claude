@@ -21,7 +21,7 @@ parser.add_argument('--size', type=int, nargs=2, metavar=('W', 'H'), default=[80
 
 args = parser.parse_args()
 
-# Register resources directories
+# Register resources directory
 ClaudeApp.resource_dir = (Path(__file__).parents[1] / 'resources').resolve()
 if args.res:
     ClaudeApp.resource_dir = args.res
@@ -33,5 +33,5 @@ ClaudeApp.port = args.port
 ClaudeApp.title = args.title
 ClaudeApp.window_size = (args.size[0], args.size[1])
 
-# Start application
+# Start application using a pyglet window
 run_window_config(ClaudeApp, args=['-wnd', 'pyglet'])
