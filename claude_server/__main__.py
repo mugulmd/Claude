@@ -12,8 +12,11 @@ parser = create_parser()
 args = parser.parse_args()
 
 # Register resources directory
-ClaudeApp.resource_dir = (Path(__file__).parents[1] / 'resources').resolve()
+internal_resources_dir = (Path(__file__).parents[1] / 'resources').resolve()
+register_dir(internal_resources_dir)
+ClaudeApp.resource_dir = internal_resources_dir
 if args.res:
+    register_dir(args.res)
     ClaudeApp.resource_dir = args.res
 
 # Configuration
