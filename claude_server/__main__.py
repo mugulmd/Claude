@@ -1,24 +1,14 @@
 from claude_server.app import ClaudeApp
+from claude_server.cli import create_parser
 
 from moderngl_window import run_window_config
 from moderngl_window.resources import register_dir
 
-from argparse import ArgumentParser
 from pathlib import Path
 
 
 # Command line interface
-parser = ArgumentParser(
-    prog='claude'
-)
-
-parser.add_argument('--res', type=str, default=None)
-parser.add_argument('--frag', type=str, default='wave.frag')
-parser.add_argument('--ip', type=str, default='127.0.0.1')
-parser.add_argument('--port', type=int, default=65432)
-parser.add_argument('--title', type=str, default='Claude')
-parser.add_argument('--size', type=int, nargs=2, metavar=('W', 'H'), default=[800, 600])
-
+parser = create_parser()
 args = parser.parse_args()
 
 # Register resources directory
