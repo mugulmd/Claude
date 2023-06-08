@@ -26,6 +26,7 @@ class ClaudeApp(mglw.WindowConfig):
     # Window configuration
     window_size = (800, 600)
     title = 'Claude'
+    aspect_ratio = None
 
     # Shader configuration
     vertex_shader = 'default.vert'
