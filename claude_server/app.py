@@ -32,6 +32,9 @@ class ClaudeApp(mglw.WindowConfig):
     vertex_shader = 'default.vert'
     fragment_shader = 'template.frag'
 
+    # Textures
+    tex_folder = None
+
     # Server configuration
     ip = '127.0.0.1'
     port = 65432

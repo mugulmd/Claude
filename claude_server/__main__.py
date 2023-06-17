@@ -21,6 +21,7 @@ if args.res:
 
 # Configuration
 ClaudeApp.fragment_shader = args.frag
+ClaudeApp.tex_folder = args.tex
 ClaudeApp.ip = args.ip
 ClaudeApp.port = args.port
 ClaudeApp.title = args.title
