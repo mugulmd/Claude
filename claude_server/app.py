@@ -97,6 +97,7 @@ class ClaudeApp(mglw.WindowConfig):
         self.load_textures()
 
     def load_textures(self):
+        counter = 0
         for dir_entry in os.scandir(ClaudeApp.tex_folder):
             # At this stage we only take directories into account
             if not dir_entry.is_dir(follow_symlinks=False):
@@ -109,6 +110,8 @@ class ClaudeApp(mglw.WindowConfig):
                 # Load texture
                 try:
                     tex = self.load_texture_2d(os.path.join(dir_entry.path, tex_name))
+                    tex.use(location=counter)
+                    counter += 1
                     textures.append(tex)
                 except Exception as e:
                     print(e)
