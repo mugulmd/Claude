@@ -7,6 +7,7 @@ from watchdog.observers import Observer
 from watchdog.events import PatternMatchingEventHandler
 
 from multiprocessing import Process, Queue
+import os
 
 
 class ClaudeApp(mglw.WindowConfig):
@@ -32,7 +33,7 @@ class ClaudeApp(mglw.WindowConfig):
     vertex_shader = 'default.vert'
     fragment_shader = 'template.frag'
 
-    # Textures
+    # Textures base folder
     tex_folder = None
 
     # Server configuration
@@ -90,6 +91,30 @@ class ClaudeApp(mglw.WindowConfig):
         # Used to reset uniforms to their latest value
         # after fragment shader is reloaded
         self.uniform_cache = {}
+
+        # Cache textures
+        self.textures = {}
+        self.load_textures()
+
+    def load_textures(self):
+        for dir_entry in os.scandir(ClaudeApp.tex_folder):
+            # At this stage we only take directories into account
+            if not dir_entry.is_dir(follow_symlinks=False):
+                continue
+
+            textures = []
+
+            # Iterate through texture files in alphabetical order
+            for tex_name in sorted(os.listdir(dir_entry.path)):
+                # Load texture
+                try:
+                    tex = self.load_texture_2d(os.path.join(dir_entry.path, tex_name))
+                    textures.append(tex)
+                except Exception as e:
+                    print(e)
+                    continue
+
+            self.textures[dir_entry.name] = textures
 
     def on_frag_changed(self, event):
         # Notify rendering process that fragment shader must be reloaded
