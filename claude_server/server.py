@@ -18,20 +18,9 @@ def server_feed(ip: str, port: int, q: Queue):
             while True:
                 data = conn.recv(1024)
                 try:
-                    # Parse message and feed it to rendering process through the queue
+                    # Decode message and feed it to rendering process through the queue
                     message = data.decode('utf-8').split(' ')
-                    datatype = message[0]
-                    name = message[1]
-                    value = message[2:]
-                    if datatype == 'i':
-                        value = list(map(int, value))
-                    else:
-                        value = list(map(float, value))
-                    q.put_nowait({
-                        'np_dtype': 'i4' if datatype == 'i' else 'f4',
-                        'name': name,
-                        'value': value
-                    })
+                    q.put_nowait(message)
                 except Exception as e:
                     print(e)
                     pass
