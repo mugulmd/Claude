@@ -3,6 +3,7 @@ from argparse import ArgumentParser
 
 def create_parser():
     """Command line interface parser for the Claude server application."""
+
     parser = ArgumentParser(
         prog='claude_server',
         description='Start the Claude server application with a given fragment shader.'
@@ -17,6 +18,11 @@ def create_parser():
         '--frag', type=str, default='wave.frag',
         help="Filename of the fragment shader to use.\n"
              "Default: %(default)s"
+    )
+    parser.add_argument(
+        '--tex', type=str, default=None,
+        help="Filepath to the base folder containing the texture folders.\n"
+             "If left to default value, no texture will be loaded."
     )
 
     parser.add_argument(

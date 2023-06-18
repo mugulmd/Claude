@@ -7,6 +7,7 @@ from watchdog.observers import Observer
 from watchdog.events import PatternMatchingEventHandler
 
 from multiprocessing import Process, Queue
+import os
 
 
 class ClaudeApp(mglw.WindowConfig):
@@ -31,6 +32,9 @@ class ClaudeApp(mglw.WindowConfig):
     # Shader configuration
     vertex_shader = 'default.vert'
     fragment_shader = 'template.frag'
+
+    # Textures base folder
+    tex_folder = None
 
     # Server configuration
     ip = '127.0.0.1'
@@ -88,9 +92,62 @@ class ClaudeApp(mglw.WindowConfig):
         # after fragment shader is reloaded
         self.uniform_cache = {}
 
+        # Cache textures
+        self.textures = []
+        self.tex_locations = {}
+        self.load_textures()
+
+    def load_textures(self):
+        for dir_entry in os.scandir(ClaudeApp.tex_folder):
+            # At this stage we only take directories into account
+            if not dir_entry.is_dir(follow_symlinks=False):
+                continue
+
+            locations = []
+
+            # Iterate through texture files in alphabetical order
+            for tex_name in sorted(os.listdir(dir_entry.path)):
+                # Load texture and bind to next texture unit available
+                try:
+                    tex = self.load_texture_2d(os.path.join(dir_entry.path, tex_name))
+                    loc = len(self.textures)
+                    tex.use(location=loc)
+                    self.textures.append(tex)
+                    locations.append(loc)
+                except Exception as e:
+                    print(e)
+                    continue
+
+            if len(locations) > 0:
+                self.tex_locations[dir_entry.name] = locations
+
     def on_frag_changed(self, event):
         # Notify rendering process that fragment shader must be reloaded
         self.reload_frag = True
+
+    def get_location(self, tex_id):
+        tex_info = tex_id.split(':', 1)
+        tex_name = tex_info[0]
+        tex_index = 0
+        if len(tex_info) > 1:
+            tex_index = int(tex_info[1]) % len(self.tex_locations[tex_name])
+        return self.tex_locations[tex_name][tex_index]
+
+    def parse_message(self, message):
+        datatype = message[0]
+        name = message[1]
+        value = message[2:]
+        np_dtype = None
+        if datatype == 'i':
+            np_dtype = 'i4'
+            value = list(map(int, value))
+        elif datatype == 't':
+            np_dtype = 'i4'
+            value = list(map(self.get_location, value))
+        elif datatype == 'f':
+            np_dtype = 'f4'
+            value = list(map(float, value))
+        return np_dtype, name, value
 
     def write_uniform(self, np_dtype, name, value, caching = True):
         try:
@@ -136,8 +193,9 @@ class ClaudeApp(mglw.WindowConfig):
         # Read messages fed from server and update uniforms accordingly
         while not self.queue.empty():
             try:
-                item = self.queue.get_nowait()
-                self.write_uniform(item['np_dtype'], item['name'], item['value'])
+                message = self.queue.get_nowait()
+                np_dtype, name, value = self.parse_message(message)
+                self.write_uniform(np_dtype, name, value)
             except Exception as e:
                 print(e)
                 pass
