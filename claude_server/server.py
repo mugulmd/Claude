@@ -19,7 +19,10 @@ def server_feed(ip: str, port: int, q: Queue):
                 data = conn.recv(1024)
                 try:
                     # Decode message and feed it to rendering process through the queue
-                    message = data.decode('utf-8').split(' ')
+                    message = data.decode('utf-8')
+                    message = message.replace('\r', '')
+                    message = message.replace('\n', '')
+                    message = message.split(' ')
                     q.put_nowait(message)
                 except Exception as e:
                     print(e)
