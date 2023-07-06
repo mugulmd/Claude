@@ -97,6 +97,9 @@ class ClaudeApp(mglw.WindowConfig):
         self.tex_locations = {}
         self.load_textures()
 
+        # Store render lopp time
+        self.render_time = 0.0
+
     def load_textures(self):
         for dir_entry in os.scandir(ClaudeApp.tex_folder):
             # At this stage we only take directories into account
@@ -133,6 +136,11 @@ class ClaudeApp(mglw.WindowConfig):
             tex_index = int(tex_info[1]) % len(self.tex_locations[tex_name])
         return self.tex_locations[tex_name][tex_index]
 
+    def to_float(self, val):
+        if val == 'cld:time':
+            return self.render_time
+        return float(val)
+
     def parse_message(self, message):
         datatype = message[0]
         name = message[1]
@@ -146,7 +154,7 @@ class ClaudeApp(mglw.WindowConfig):
             value = list(map(self.get_location, value))
         elif datatype == 'f':
             np_dtype = 'f4'
-            value = list(map(float, value))
+            value = list(map(self.to_float, value))
         return np_dtype, name, value
 
     def write_uniform(self, np_dtype, name, value, caching = True):
@@ -171,6 +179,7 @@ class ClaudeApp(mglw.WindowConfig):
     def render(self, time, frametime):
         # Prepare next frame
         self.ctx.clear(0.0, 0.0, 0.0, 0.0)
+        self.render_time = time
 
         # Reload fragment shader
         if self.reload_frag:
