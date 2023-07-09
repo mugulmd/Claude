@@ -15,13 +15,12 @@ args = parser.parse_args()
 internal_resources_dir = (Path(__file__).parents[1] / 'resources').resolve()
 register_dir(internal_resources_dir)
 ClaudeApp.resource_dir = internal_resources_dir
-if args.res:
-    register_dir(args.res)
-    ClaudeApp.resource_dir = args.res
 
 # Configuration
-ClaudeApp.fragment_shader = args.frag
-ClaudeApp.tex_folder = args.tex
+if args.frag:
+    ClaudeApp.fragment_shader = args.frag
+if args.tex:
+    ClaudeApp.tex_folder = args.tex
 ClaudeApp.ip = args.ip
 ClaudeApp.port = args.port
 ClaudeApp.title = args.title

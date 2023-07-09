@@ -31,7 +31,7 @@ class ClaudeApp(mglw.WindowConfig):
 
     # Shader configuration
     vertex_shader = 'default.vert'
-    fragment_shader = 'template.frag'
+    fragment_shader = 'wave.frag'
 
     # Textures base folder
     tex_folder = None

@@ -10,14 +10,9 @@ def create_parser():
     )
 
     parser.add_argument(
-        '--res', type=str, default=None,
-        help="Filepath to the resource folder containing the fragment shader.\n"
-             "If left to default value, Claude's internal resources folder will be used."
-    )
-    parser.add_argument(
-        '--frag', type=str, default='wave.frag',
-        help="Filename of the fragment shader to use.\n"
-             "Default: %(default)s"
+        '--frag', type=str, default=None,
+        help="Filepath to the input fragment shader.\n"
+             "If left to default value, a demo wave shader will be used."
     )
     parser.add_argument(
         '--tex', type=str, default=None,
