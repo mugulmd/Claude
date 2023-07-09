@@ -101,6 +101,9 @@ class ClaudeApp(mglw.WindowConfig):
         self.render_time = 0.0
 
     def load_textures(self):
+        if not ClaudeApp.tex_folder:
+            return
+
         for dir_entry in os.scandir(ClaudeApp.tex_folder):
             # At this stage we only take directories into account
             if not dir_entry.is_dir(follow_symlinks=False):
