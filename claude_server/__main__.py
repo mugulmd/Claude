@@ -5,6 +5,7 @@ from moderngl_window import run_window_config
 from moderngl_window.resources import register_dir
 
 from pathlib import Path
+import logging
 
 
 # Command line interface
@@ -17,6 +18,7 @@ register_dir(internal_resources_dir)
 ClaudeApp.resource_dir = internal_resources_dir
 
 # Configuration
+logging.basicConfig(level=logging.DEBUG)
 if args.frag:
     ClaudeApp.fragment_shader = args.frag
 if args.tex:

@@ -1,5 +1,6 @@
 import socket
 from multiprocessing import Queue
+import logging
 
 
 def server_feed(ip: str, port: int, q: Queue):
@@ -12,7 +13,7 @@ def server_feed(ip: str, port: int, q: Queue):
         # Client connection
         conn, addr = s.accept()
         with conn:
-            print(f'Connected with {addr}')
+            logging.info(f'[server_feed] Connected with %s', addr)
 
             # Listen to messages from client
             while True:
@@ -22,8 +23,9 @@ def server_feed(ip: str, port: int, q: Queue):
                     message = data.decode('utf-8')
                     message = message.replace('\r', '')
                     message = message.replace('\n', '')
+                    logging.debug(f'[server_feed] Received message: %s', message)
                     message = message.split(' ')
                     q.put_nowait(message)
                 except Exception as e:
-                    print(e)
+                    logging.error(f'[server_feed] %s', e)
                     pass

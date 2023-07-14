@@ -8,6 +8,7 @@ from watchdog.events import PatternMatchingEventHandler
 
 from multiprocessing import Process, Queue
 import os
+import logging
 
 
 class ClaudeApp(mglw.WindowConfig):
@@ -97,7 +98,7 @@ class ClaudeApp(mglw.WindowConfig):
         self.tex_locations = {}
         self.load_textures()
 
-        # Store render lopp time
+        # Store render loop time
         self.render_time = 0.0
 
     def load_textures(self):
@@ -121,7 +122,7 @@ class ClaudeApp(mglw.WindowConfig):
                     self.textures.append(tex)
                     locations.append(loc)
                 except Exception as e:
-                    print(e)
+                    logging.error('[load_textures] %s', e)
                     continue
 
             if len(locations) > 0:
@@ -168,7 +169,7 @@ class ClaudeApp(mglw.WindowConfig):
                 # Send value as raw bytes
                 uniform.write(np.array(value).astype(np_dtype).tobytes())
         except Exception as e:
-            print(e)
+            logging.error(f'[write_uniform] %s', e)
             return
 
         # Uniform value was sent successfully
@@ -200,7 +201,7 @@ class ClaudeApp(mglw.WindowConfig):
                 for name, content in self.uniform_cache.items():
                     self.write_uniform(content['np_dtype'], name, content['value'], False)
             except Exception as e:
-                print(e)
+                logging.error(f'[render] %s', e)
 
         # Read messages fed from server and update uniforms accordingly
         while not self.queue.empty():
@@ -209,7 +210,7 @@ class ClaudeApp(mglw.WindowConfig):
                 np_dtype, name, value = self.parse_message(message)
                 self.write_uniform(np_dtype, name, value)
             except Exception as e:
-                print(e)
+                logging.error('[render] %s', e)
                 pass
 
         # Update time
