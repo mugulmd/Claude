@@ -42,4 +42,10 @@ def create_parser():
              "Default: %(default)s"
     )
 
+    parser.add_argument(
+        '--verbose', type=str, default='info',
+        help="Verbose level (debug, info, warning, error, critical).\n"
+             "Default: %(default)s"
+    )
+
     return parser
