@@ -13,7 +13,7 @@ def server_feed(ip: str, port: int, q: Queue):
         # Client connection
         conn, addr = s.accept()
         with conn:
-            logging.info(f'[server_feed] Connected with %s', addr)
+            logging.info('Connected with %s', addr)
 
             # Listen to messages from client
             while True:
@@ -23,9 +23,9 @@ def server_feed(ip: str, port: int, q: Queue):
                     message = data.decode('utf-8')
                     message = message.replace('\r', '')
                     message = message.replace('\n', '')
-                    logging.debug(f'[server_feed] Received message: %s', message)
+                    logging.debug('Received message: %s', message)
                     message = message.split(' ')
                     q.put_nowait(message)
                 except Exception as e:
-                    logging.error(f'[server_feed] %s', e)
+                    logging.error('Error while decoding message: %s', e)
                     pass

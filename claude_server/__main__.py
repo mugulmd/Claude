@@ -18,7 +18,10 @@ register_dir(internal_resources_dir)
 ClaudeApp.resource_dir = internal_resources_dir
 
 # Configuration
-logging.basicConfig(level=args.verbose.upper())
+logging.basicConfig(
+    format='%(asctime)s - [%(levelname)s]::%(filename)s::%(funcName)s::%(lineno)d - %(message)s',
+    level=args.verbose.upper()
+)
 if args.frag:
     ClaudeApp.fragment_shader = args.frag
 if args.tex:
