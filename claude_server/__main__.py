@@ -17,7 +17,7 @@ internal_resources_dir = (Path(__file__).parents[1] / 'resources').resolve()
 register_dir(internal_resources_dir)
 ClaudeApp.resource_dir = internal_resources_dir
 
-# Configuration
+# Log level coloring
 logging.addLevelName(
     logging.INFO,
     '\u001b[32mINFO\u001b[0m'
@@ -34,10 +34,13 @@ logging.addLevelName(
     logging.CRITICAL,
     '\u001b[31m\u001b[1mCRITICAL\u001b[0m'
 )
+
+# Configuration
 logging.basicConfig(
     format='%(asctime)s - [%(levelname)s]::%(filename)s::%(funcName)s::%(lineno)d - %(message)s',
     level=args.verbose.upper()
 )
+ClaudeApp.log_level = logging.getLevelName(args.verbose.upper())
 if args.frag:
     ClaudeApp.fragment_shader = args.frag
 if args.tex:
