@@ -27,5 +27,5 @@ def server_feed(ip: str, port: int, q: Queue):
                     message = message.split(' ')
                     q.put_nowait(message)
                 except Exception as e:
-                    logging.error('Error while decoding message: %s', e)
+                    logging.error('%s', e)
                     pass

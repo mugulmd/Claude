@@ -18,6 +18,22 @@ register_dir(internal_resources_dir)
 ClaudeApp.resource_dir = internal_resources_dir
 
 # Configuration
+logging.addLevelName(
+    logging.INFO,
+    '\u001b[32mINFO\u001b[0m'
+)
+logging.addLevelName(
+    logging.WARNING,
+    '\u001b[33mWARNING\u001b[0m'
+)
+logging.addLevelName(
+    logging.ERROR,
+    '\u001b[31mERROR\u001b[0m'
+)
+logging.addLevelName(
+    logging.CRITICAL,
+    '\u001b[31m\u001b[1mCRITICAL\u001b[0m'
+)
 logging.basicConfig(
     format='%(asctime)s - [%(levelname)s]::%(filename)s::%(funcName)s::%(lineno)d - %(message)s',
     level=args.verbose.upper()
