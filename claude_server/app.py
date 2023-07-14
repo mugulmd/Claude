@@ -83,7 +83,7 @@ class ClaudeApp(mglw.WindowConfig):
         self.observer = Observer()
         self.observer.schedule(
             filewatcher_handler,
-            path=ClaudeApp.resource_dir,
+            path=os.path.dirname(ClaudeApp.fragment_shader),
             recursive=False
         )
         self.observer.start()
