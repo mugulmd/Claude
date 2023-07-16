@@ -141,7 +141,7 @@ class ClaudeApp(mglw.WindowConfig):
         return self.tex_locations[tex_name][tex_index]
 
     def to_float(self, val):
-        if val == 'cld:time':
+        if val == 'cldtime':
             return self.render_time
         return float(val)
 
