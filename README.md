@@ -87,8 +87,12 @@ def wave(p=2, i=0):
     again(wave, p=2, i=i+1)
 ```
 
-> Note: for now only the float and integer datatypes are supported ('f' and 'i').
-> The default datatype is float, hence it is not necessary to specify it.
+The currently supported datatypes are:
+- `f`: float
+- `i`: int
+- `t`: texture.
+
+> Note: the default datatype is float, hence it is not necessary to specify it.
 
 ### Shader live-coding
 
@@ -97,11 +101,53 @@ The `claude_server` application has a few configuration options that can be deta
 python -m claude_server -h
 ```
 
-The two most important options are `--res` and `--frag`, which allow you to pass in and use your own fragment shader.
+The most important option is `--frag`, which allow you to pass in and use your own fragment shader.
 
 Claude is designed for live-coding: you can edit your fragment shader while Claude is running, and every time you save it Claude will update its content.
 
 Feel free to use the [template shader](resources/template.frag) and [utilities](resources/utils/glsl) provided.
+
+### Advanced workflows
+
+#### Textures
+
+2D textures can be passed to Claude when launching the application by providing a texture folder with the `--tex` option.
+
+The file structure must be organized into image packs like this:
+```
+textures
+|_ foo
+|  |_ foo1.png
+|  |_ foo2.png
+|  |_ ...
+|_ bar
+   |_ some_bar.jpg
+   |_ another_bar.jpg
+   |_ ...
+```
+
+To access textures in your fragment shader, use a 2D sampler: `uniform sampler2D img;`.
+
+Then you can modify the texture referenced by the 2D sampler from a client by using the `t` datatype and the `img_pack:img_index` syntax:
+```python
+@swim
+def animate(p=1, i=0):
+    Claude('img', 'foo:[0:10]', dt='t', i=i)
+    again(animate, p=1, i=i+1)
+```
+
+> Note: all the images in the input texture folder will be loaded into memory, make sure you do not exceed memory limits.
+
+#### Time catching
+
+The idea of time catching is to capture the value of the rendering loop time at a given moment and store it into a uniform variable.
+
+To access this rendering loop time from a client, use the `cldtime` syntax.
+
+This feature is quite useful to create animations:
+- add a float uniform to your shader that will capture time values: `uniform float tReset = 0.;`
+- send time catching messages from a Sardine swim function: `Claude('tReset', 'cldtime', i=i)`
+- use this to animate a property in your shader whenever the time is reset: `prop = mix(p0, p1, 1.-exp(tReset-time));`.
 
 ## Contributions
 
